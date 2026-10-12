@@ -1,0 +1,16 @@
+name: docusaurus
+id: ari:cloud:compass:a6cfc8fc-276a-46ca-bc5d-9ef8e2c0e25b:component/b30eb84a-9cc3-47a4-b92a-9331bfc390fa/b464987f-184c-44b0-a15e-5f9cf9129d15
+description: Easy to maintain open source documentation websites.
+configVersion: 1
+typeId: SERVICE
+fields:
+  tier: 4
+links:
+  - name: null
+    type: REPOSITORY
+    url: https://github.com/orchestrated-io/docusaurus
+relationships:
+  DEPENDS_ON: []
+labels:
+  - source:github
+customFields: null
