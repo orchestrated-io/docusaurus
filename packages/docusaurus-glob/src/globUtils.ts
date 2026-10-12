@@ -8,7 +8,7 @@
 // Tinyglobby/Micromatch are the 2 libs we use in Docusaurus consistently
 
 import path from 'node:path';
-import Micromatch from 'micromatch';
+import picomatch from 'picomatch';
 import * as Tinyglobby from 'tinyglobby';
 
 /**
@@ -57,10 +57,8 @@ export function createMatcher(patterns: string[]): Matcher {
     // `/(?:)/.test("foo")` is `true`
     return () => false;
   }
-  const regexp = new RegExp(
-    patterns.map((pattern) => Micromatch.makeRe(pattern).source).join('|'),
-  );
-  return (str) => regexp.test(str);
+  const isMatch = picomatch(patterns, {dot: true});
+  return (str) => isMatch(str);
 }
 
 /**

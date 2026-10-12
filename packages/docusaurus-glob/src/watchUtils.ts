@@ -5,21 +5,28 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-// Chokidar is the lib we use in Docusaurus to watch files
+import chokidar from 'chokidar';
+import {
+  prepareWatchTargets,
+  relativePathFromCwd,
+} from './watchPatternUtils';
 
-import * as Chokidar from 'chokidar';
+type ChokidarWatchOptions = NonNullable<Parameters<typeof chokidar.watch>[1]>;
 
 /**
  * Our own watch options: we only expose the options we actually use, so that
  * we can upgrade or swap the underlying lib.
  */
 export type WatchOptions = Pick<
-  Chokidar.WatchOptions,
+  ChokidarWatchOptions,
   'cwd' | 'usePolling' | 'interval'
 >;
 
 /** Our own file watcher handle, exposing only the APIs we actually use. */
-export type Watcher = Pick<Chokidar.FSWatcher, 'on' | 'close'>;
+export type Watcher = Pick<
+  ReturnType<typeof chokidar.watch>,
+  'on' | 'close'
+>;
 
 /**
  * Watches file system paths for changes.
@@ -29,9 +36,19 @@ export function watch(
   paths: string | string[],
   options?: WatchOptions,
 ): Watcher {
-  return Chokidar.watch(paths, {
+  const {watchPaths, shouldWatchRelativePath} = prepareWatchTargets(paths);
+  const cwd = options?.cwd;
+
+  return chokidar.watch(watchPaths, {
     // Other lib options are still forwarded at runtime for retro-compatibility
     ...options,
+    ignored: (absolutePath, stats) => {
+      if (stats?.isDirectory()) {
+        return false;
+      }
+      const relativePath = relativePathFromCwd(absolutePath, cwd);
+      return !shouldWatchRelativePath(relativePath);
+    },
     ignoreInitial: true,
   });
 }
